@@ -1,0 +1,30 @@
+#!/usr/bin/env python
+
+from sys import argv
+from os import path, system
+from subprocess import Popen
+
+import src.db_utils
+
+
+# Log
+src.db_utils.ExecuteOne("INSERT INTO UlyssesStarts (date) VALUES (?);", (src.db_utils.curr_time_str(),))
+
+
+# Refresh the precommitment system
+print "\nRELOADING PRECOMMITMENT SYSTEM..."
+Popen([path.join(path.dirname(path.realpath(__file__)), 'src', 'precommitment', 'req.py'), 'refresh']).wait()
+
+
+
+print "\nSTARTING PROXY..."
+from src.proxy.proxy_server import AsyncMitmProxy
+from src.gate.gatekeeper import GatekeeperHandler
+
+# Create and start the proxy
+proxy = AsyncMitmProxy(RequestHandlerClass=GatekeeperHandler)
+try:
+	proxy.serve_forever()
+except KeyboardInterrupt:
+	proxy.server_close()
+

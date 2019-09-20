@@ -1,0 +1,3 @@
+in /etc/rc.local, add the following, to activate iptables on startup:
+	/sbin/iptables-restore </root/ulysses/extra/iptables_block_nonproxy
+
